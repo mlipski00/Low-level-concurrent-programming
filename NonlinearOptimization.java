@@ -9,54 +9,59 @@ public class NonlinearOptimization {
     final static int DIMENSION_SIZE = 5;
 
     public static void main(String[] args) {
-        System.out.println(ControlledRandomSearch(0));
-        System.out.println(ControlledRandomSearch(2));
-        Set<Double> randomPoints = getRandomPoints(DIMENSION_SIZE);
-        for (double number : randomPoints) {
-            System.out.println(number);
+        System.out.println(ControlledRandomSearch(new int[]{0, 0, 0, 0, 0}));
+        System.out.println(ControlledRandomSearch(new int[]{2, 0, 0, 0, 0}));
+        Set<int[]> randomPoints = getRandomPoints();
+        for (int[] number : randomPoints) {
+            System.out.print("\n");
+            for (int valueOfPoint : number) {
+                System.out.print(valueOfPoint + " | ");
+            }
         }
+        System.out.print("\n");
         System.out.println(getMinimalPoint(randomPoints));
         System.out.println(getMaximalPoint(randomPoints));
     }
 
-    static double ControlledRandomSearch(double point) {
-
-            double sumOfXsqure = 0;
-
+    static double ControlledRandomSearch(int[] point) {
+        double sumOfXsqure = 0;
+        double multiplicationOfCosXdividedByIterator = 0;
+        for (int i = 0; i < point.length; i++) {
             // obliczenie sumy kwadratów wartości X tyle ile wymiarów
-            for (int j = 1; j <= DIMENSION_SIZE; j++) {
-                sumOfXsqure = +Math.sqrt(point);
-            }
+            sumOfXsqure = +Math.sqrt(point[i]);
 
-            //obliczenie mnożenia cos(x/i) tyle ile wymiarów
-            double multiplicationOfCosXdividedByIterator = Math.cos(point);
-            for (int j = 2; j <= DIMENSION_SIZE; j++) {
-                multiplicationOfCosXdividedByIterator *= Math.cos(point);
-            }
-
+        }
+        //obliczenie mnożenia cos(x/i) tyle ile wymiarów
+        multiplicationOfCosXdividedByIterator = Math.cos(point[0]);
+        for (int i = 1; i < point.length; i++) {
+            multiplicationOfCosXdividedByIterator *= Math.cos(point[i]);
+        }
         return 1 / 40 * sumOfXsqure + 1 - multiplicationOfCosXdividedByIterator;
     }
 
     //krok 1
-    static Set<Double> getRandomPoints(int dimension) {
-        Set<Double> generatedRandomPoints = new HashSet<>();
+    static Set<int[]> getRandomPoints() {
+        Set<int[]> generatedRandomPoints = new HashSet<>();
         Random random = new Random();
         // ograniczam maksymalną liczbę wylosowanych punktów do 100 + (10*(n+))
         // dodatkowo dodaje 1 żeby liczba wylosowanych punków była większa od (10*(n+))
-        int setOfPointsSize = random.nextInt(101) + 10 * (dimension + 1) + 1;
+        int setOfPointsSize = random.nextInt(101) + 10 * (DIMENSION_SIZE + 1) + 1;
 
         while (generatedRandomPoints.size() != setOfPointsSize) {
-            //przyjąłem, że losuję liczby od 0 do 100 (nextDouble() losuje liczby zmiennoprzecinkowe w przedziale 0-1)
-            generatedRandomPoints.add(random.nextDouble()*100);
+            int[] point = new int[DIMENSION_SIZE];
+            for (int i = 0; i < DIMENSION_SIZE; i++) {
+                point[i] = random.nextInt();
+            }
+            generatedRandomPoints.add(point);
         }
         return generatedRandomPoints;
     }
 
     //krok 2
-    static double getMinimalPoint(Set<Double> setOfRandomPoints)  {
+    static double getMinimalPoint(Set<int[]> setOfRandomPoints) {
         double minimalPoint = Double.MAX_VALUE;
         double result;
-        for (double valueX : setOfRandomPoints) {
+        for (int[] valueX : setOfRandomPoints) {
             result = ControlledRandomSearch(valueX);
             if (result < minimalPoint) {
                 minimalPoint = result;
@@ -65,10 +70,10 @@ public class NonlinearOptimization {
         return minimalPoint;
     }
 
-    static double getMaximalPoint(Set<Double> setOfRandomPoints) {
+    static double getMaximalPoint(Set<int[]> setOfRandomPoints) {
         double maximalPoint = 0;
         double result;
-        for (double valueX : setOfRandomPoints) {
+        for (int[] valueX : setOfRandomPoints) {
             result = ControlledRandomSearch(valueX);
             if (result > maximalPoint) {
                 maximalPoint = result;
