@@ -28,12 +28,13 @@ public class NonlinearOptimization {
         }
         System.out.println("\n minimum i maksimum");
         System.out.println(getMaximalPoint(randomPoints));
-        double minimalPoint = getMinimalPoint(randomPoints);
+        Map<Double, int[]> minimalPoint = getMinimalPoint(randomPoints);
         System.out.println(minimalPoint);
-        System.out.println("\n Centrum symplexu");
-        double simplex = createSimplexAndGetCenter(randomNPoints, minimalPoint);
+        System.out.println("\n Wierzchołki wygenerowanego symplexu");
+        Map.Entry<Double, int[]> entry = minimalPoint.entrySet().iterator().next();
+        List<int[]> simplex = createSimplex(randomNPoints, minimalPoint.get(entry.getKey()));
 
-            System.out.print(simplex + "\n | ");
+        System.out.print(Arrays.toString(simplex.toArray()) + "\n | ");
     }
 
     static double ControlledRandomSearch(int[] point) {
@@ -71,29 +72,50 @@ public class NonlinearOptimization {
         return generatedRandomPoints;
     }
 
-    //krok 2 wyliczanie mimalnej i maksymalnej wartości wśród każdego z wylosowanych punktów
-    static double getMinimalPoint(Set<int[]> setOfRandomPoints) {
+    /**
+     * Krok 2 wyliczanie mimalnej i maksymalnej wartości wśród każdego z wylosowanych punktów
+     */
+
+    /**
+     * Wyliczenie minimum.
+     * @param setOfRandomPoints lista unikalnych wylosowanych punktów.
+     * @return jednoelementowa mapa, której kluczem jest najmenijszy wynik funkcji CRS a wartością punkt z którego otrzymano wynik.
+     */
+    static Map<Double, int[]> getMinimalPoint(Set<int[]> setOfRandomPoints) {
         double minimalPoint = Double.MAX_VALUE;
         double result;
+        int[] minimalPointValues = new int[DIMENSION_SIZE];
         for (int[] valueX : setOfRandomPoints) {
             result = ControlledRandomSearch(valueX);
             if (result < minimalPoint) {
                 minimalPoint = result;
+                minimalPointValues = valueX;
             }
         }
-        return minimalPoint;
+        Map<Double, int[]> csrResultAndPointValues = new HashMap<>();
+        csrResultAndPointValues.put(minimalPoint, minimalPointValues);
+        return csrResultAndPointValues;
     }
 
-    static double getMaximalPoint(Set<int[]> setOfRandomPoints) {
+    /**
+     * Wyliczenie maximum.
+     * @param setOfRandomPoints lista unikalnych wylosowanych punktów.
+     * @return jednoelementowa mapa, której kluczem jest największy wynik funkcji CRS a wartością punkt z którego otrzymano wynik.
+     */
+    static Map<Double, int[]> getMaximalPoint(Set<int[]> setOfRandomPoints) {
         double maximalPoint = 0;
         double result;
+        int[] maximalPointValues = new int[DIMENSION_SIZE];
         for (int[] valueX : setOfRandomPoints) {
             result = ControlledRandomSearch(valueX);
             if (result > maximalPoint) {
                 maximalPoint = result;
+                maximalPointValues = valueX;
             }
         }
-        return maximalPoint;
+        Map<Double, int[]> csrResultAndPointValues = new HashMap<>();
+        csrResultAndPointValues.put(maximalPoint, maximalPointValues);
+        return csrResultAndPointValues;
     }
 
     //krok 3 Wylosować ze zbioru P n punktów i utworzyć n + 1 wymiarowy sympleks. Wyznaczyć środek sympleksu:
@@ -102,26 +124,37 @@ public class NonlinearOptimization {
         List<int[]> listOfRandomPoints = new ArrayList<>(randomPoints);
         int[] randomNPoints = new int[DIMENSION_SIZE];
         Set<int[]> setOfNPoints = new HashSet<>();
-        for (int i = 0; i <= DIMENSION_SIZE; i++) {
+        for (int i = 0; i < DIMENSION_SIZE; i++) {
             setOfNPoints.add(listOfRandomPoints.get(random.nextInt(randomPoints.size())));
         }
         return setOfNPoints;
     }
 
-    static double createSimplexAndGetCenter(Set<int[]> setOfNPoints, double bestPoint) {
-        List<int[]> listOfNPoints = new ArrayList<>(setOfNPoints);
-        double[] simplex = new double[DIMENSION_SIZE + 1];
-        simplex[0] = bestPoint;
-        for (int i = 1; i <= DIMENSION_SIZE; i++) {
-            int[] point = listOfNPoints.get(i - 1);
-            double crsResult = ControlledRandomSearch(point);
-            simplex[i] = crsResult;
-        }
+    static List<int[]> createSimplex(Set<int[]> setOfNPoints, int[] bestPoint) {
+        List<int[]> simplex = new ArrayList<>(Arrays.asList(bestPoint));
+        simplex.addAll(setOfNPoints);
+        return simplex;
+    }
+
+    static double getSimplexCenter(double[] simplex) {
         double sumOfSimplexApexes = simplex[0];
         for (int i = 1; i < DIMENSION_SIZE; i++) {
-            sumOfSimplexApexes =+ simplex[i];
+            sumOfSimplexApexes = +simplex[i];
         }
-        double v = (1.0 / (double) DIMENSION_SIZE) * sumOfSimplexApexes;
-        return v;
+        return (1.0 / (double) DIMENSION_SIZE) * sumOfSimplexApexes;
     }
+
+    // Krok 4 Operacja odbicia: odbij punkt xn względem środka sympleksu
+    static double bounceSimplex(double simplexCenter, double[] simplex) {
+        return 2 * simplexCenter - simplex[DIMENSION_SIZE + 1];
+    }
+
+    // Krok 5  Sprawdź czy xr pełnia ograniczenia. Jeśli tak to Krok 6. Jeśli nie Krok 3.
+    static boolean checkLimits(double bouncedSiplex) {
+        return bouncedSiplex > -40 && bouncedSiplex < 40 || false;
+    }
+
+    //Krok 6 Sprawdź czy jest to punkt lepszy od najgorszego, tzn. spełnia f(xr) < f(xh).
+    // Jeśli takto w zbiorze P, w miejsce punktu xh wstaw xr i Krok 2. Jeśli nie to Krok 3
+
 }
