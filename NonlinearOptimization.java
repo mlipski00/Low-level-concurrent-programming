@@ -4,7 +4,7 @@ import java.util.*;
 public class NonlinearOptimization {
 
     final static int DIMENSION_SIZE = 5;
-    final static double EPSILON = 0.001;
+    final static double EPSILON = 0.0001;
     static Set<int[]> randomPoints;
     static List<int[]> nPoints;
     static List<int[]> simplex;
@@ -29,7 +29,7 @@ public class NonlinearOptimization {
                 Map<Double, int[]> minimalPointMap = getMinimalPoint(randomPoints);
                 final Map.Entry<Double, int[]> entry = minimalPointMap.entrySet().iterator().next();
                 minimalPoint = minimalPointMap.get(entry.getKey());
-                System.out.println("Bieżący punkt minimalny to: " + Arrays.toString(minimalPoint));
+                System.out.println("Aktualny punkt minimalny to: " + Arrays.toString(minimalPoint));
                 System.out.println("Wynik algorytmu CRS: " + new DecimalFormat("#0.000000").format(controlledRandomSearch(minimalPoint)));
             }
             loop = controlledRandomSearch(minimalPoint) < EPSILON;
