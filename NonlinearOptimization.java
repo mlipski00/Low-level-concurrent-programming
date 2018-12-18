@@ -67,24 +67,24 @@ public class NonlinearOptimization {
 
         for (int i = 0; i < point.length; i++) {
             /**
-             * Obliczenie sumy kwadratów dla każdej ze składowych punktu
+             * Obliczenie sumy kwadratów dla każdej ze składowych punktu.
              */
             if (point[i] != 0) {
                 sumOfXsqure = +point[i] * point[i];
             }
         }
         /**
-         * Mnożenie cos(x/i) z każdej ze składowych punktu
+         * Mnożenie cos(x/i) z każdej ze składowych punktu.
          */
         multiplicationOfCosXdividedByIterator = Math.cos(point[0]);
         for (int i = 1; i < point.length; i++) {
-            multiplicationOfCosXdividedByIterator *= (Math.cos(point[i] / i));
+            multiplicationOfCosXdividedByIterator *= (Math.cos(point[i] / i + 1));
         }
         return 1 / 40 * sumOfXsqure + 1 - multiplicationOfCosXdividedByIterator;
     }
 
     /**
-     * Krok 1 Wylosować zbiór P punktów o liczności N > 10(n + 1), gdzie n — wymiar zadania.
+     * Krok 1: Wylosować zbiór P punktów o liczności N > 10(n + 1), gdzie n — wymiar zadania.
      */
     static Set<int[]> getRandomPoints() {
         Set<int[]> generatedRandomPoints = new HashSet<>();
@@ -105,7 +105,7 @@ public class NonlinearOptimization {
     }
 
     /**
-     * Krok 2 wyliczanie mimalnej i maksymalnej wartości wśród każdego z wylosowanych punktów
+     * Krok 2: wyliczanie mimalnej i maksymalnej wartości wśród każdego z wylosowanych punktów.
      */
 
     /**
@@ -208,7 +208,7 @@ public class NonlinearOptimization {
     }
 
     /**
-     * Krok 4: Operacja odbicia: odbij punkt xn względem środka sympleksu
+     * Krok 4: Operacja odbicia: odbij punkt xn względem środka sympleksu.
      */
     static int[] bounceSimplex(int[] simplexCenter, int[] xnApexOfSimplex) {
         int[] pointBouncedByCenterOfSimplex = new int[DIMENSION_SIZE];
@@ -219,7 +219,7 @@ public class NonlinearOptimization {
     }
 
     /**
-     * Krok 5: Sprawdź czy xr pełnia ograniczenia. Jeśli tak to Krok 6. Jeśli nie Krok 3.
+     * Krok 5: Sprawdź czy xr spełnia ograniczenia. Jeśli tak to Krok 6. Jeśli nie Krok 3.
      */
     static boolean checkLimits(int[] pointBouncedByCenterOfSimplex) {
         for (int i = 0; i < DIMENSION_SIZE; i++) {
