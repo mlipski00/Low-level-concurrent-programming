@@ -6,7 +6,7 @@ import java.util.*;
 public class NonlinearOptimization {
 
     final static int DIMENSION_SIZE = 5;
-    final static double EPSILON = 0.000001;
+    final static double EPSILON = 0.001;
     static Set<int[]> randomPoints;
     static List<int[]> nPoints;
     static List<int[]> simplex;
@@ -32,7 +32,7 @@ public class NonlinearOptimization {
                 final Map.Entry<Double, int[]> entry = minimalPointMap.entrySet().iterator().next();
                 minimalPoint = minimalPointMap.get(entry.getKey());
                 System.out.println("Bieżący punkt minimalny to: " + Arrays.toString(minimalPoint));
-                System.out.println("Wynik algorytmu: CRS " + new DecimalFormat("#0.000000").format(controlledRandomSearch(minimalPoint)));
+                System.out.println("Wynik algorytmu: CRS " + new DecimalFormat("#0.0000").format(controlledRandomSearch(minimalPoint)));
             }
             loop = controlledRandomSearch(minimalPoint) < EPSILON;
             nPoints = getNPoints(randomPoints);
@@ -66,15 +66,19 @@ public class NonlinearOptimization {
         double multiplicationOfCosXdividedByIterator;
 
         for (int i = 0; i < point.length; i++) {
-            // obliczenie sumy kwadratów wartości X dla każdej z wartości punktu
+            /**
+             * obliczenie sumy kwadratów dla każdej ze składowych punktu
+             */
             if (point[i] != 0) {
                 sumOfXsqure = +point[i] * point[i];
             }
         }
-        //obliczenie mnożenia cos(x/i) dla każdej z wartości punkytu
+        /**
+         * mnożenie cos(x/i) z każdej ze składowych punktu
+         */
         multiplicationOfCosXdividedByIterator = Math.cos(point[0]);
         for (int i = 1; i < point.length; i++) {
-            multiplicationOfCosXdividedByIterator *= Math.cos(point[i]);
+            multiplicationOfCosXdividedByIterator *= (Math.cos(point[i]) / i);
         }
         return 1 / 40 * sumOfXsqure + 1 - multiplicationOfCosXdividedByIterator;
     }
@@ -167,9 +171,9 @@ public class NonlinearOptimization {
     /**
      * Stworzenie n+1 wymiarowego symplexu.
      */
-    static List<int[]> createSimplex(List<int[]> setOfNPoints, int[] bestPoint) {
+    static List<int[]> createSimplex(List<int[]> listOfNPoints, int[] bestPoint) {
         List<int[]> simplex = new ArrayList<>(Arrays.asList(bestPoint));
-        simplex.addAll(setOfNPoints);
+        simplex.addAll(listOfNPoints);
         return simplex;
     }
 
