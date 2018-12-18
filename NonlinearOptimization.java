@@ -44,7 +44,7 @@ public class NonlinearOptimization {
                 double xr = controlledRandomSearch(pointBouncedByCenterOfSimplex);
                 double xh = controlledRandomSearch(minimalPoint);
                 /**
-                 * Krok 6 Sprawdź czy jest to punkt lepszy od najgorszego, tzn. spełnia f(xr) < f(xh).
+                 * Krok 6: Sprawdź czy jest to punkt lepszy od najgorszego, tzn. spełnia f(xr) < f(xh).
                  * Jeśli tak to w zbiorze P, w miejsce punktu xh wstaw xr i Krok 2. Jeśli nie to Krok 3
                  */
                 if (xr < xh) {
@@ -67,14 +67,14 @@ public class NonlinearOptimization {
 
         for (int i = 0; i < point.length; i++) {
             /**
-             * obliczenie sumy kwadratów dla każdej ze składowych punktu
+             * Obliczenie sumy kwadratów dla każdej ze składowych punktu
              */
             if (point[i] != 0) {
                 sumOfXsqure = +point[i] * point[i];
             }
         }
         /**
-         * mnożenie cos(x/i) z każdej ze składowych punktu
+         * Mnożenie cos(x/i) z każdej ze składowych punktu
          */
         multiplicationOfCosXdividedByIterator = Math.cos(point[0]);
         for (int i = 1; i < point.length; i++) {
@@ -89,7 +89,9 @@ public class NonlinearOptimization {
     static Set<int[]> getRandomPoints() {
         Set<int[]> generatedRandomPoints = new HashSet<>();
         Random random = new Random();
-        // ograniczam maksymalną liczbę wylosowanych punktów do 500 + (10*(n+1))
+        /**
+         * Ograniczam maksymalną liczbę wylosowanych punktów do 500 + (10*(n+1))
+         */
         int setOfPointsSize = random.nextInt(501) + 10 * (DIMENSION_SIZE + 1) + 1;
 
         while (generatedRandomPoints.size() != setOfPointsSize) {
@@ -110,7 +112,7 @@ public class NonlinearOptimization {
      * Wyliczenie minimum.
      *
      * @param setOfRandomPoints lista unikalnych wylosowanych punktów.
-     * @return jednoelementowa mapa, której kluczem jest najmenijszy wynik funkcji CRS a wartością punkt z którego otrzymano wynik.
+     * @return jedno elementowa mapa, której kluczem jest najmenijszy wynik funkcji CRS a wartością punkt z którego otrzymano wynik.
      */
     static Map<Double, int[]> getMinimalPoint(Set<int[]> setOfRandomPoints) {
         double minimalPoint = Double.MAX_VALUE;
@@ -132,7 +134,7 @@ public class NonlinearOptimization {
      * Wyliczenie maximum.
      *
      * @param setOfRandomPoints lista unikalnych wylosowanych punktów.
-     * @return jednoelementowa mapa, której kluczem jest największy wynik funkcji CRS a wartością punkt z którego otrzymano wynik.
+     * @return jedno elementowa mapa, której kluczem jest największy wynik funkcji CRS a wartością punkt z którego otrzymano wynik.
      */
     static Map<Double, int[]> getMaximalPoint(Set<int[]> setOfRandomPoints) {
         double maximalPoint = 0;
@@ -151,7 +153,7 @@ public class NonlinearOptimization {
     }
 
     /**
-     * krok 3 Wylosować ze zbioru P n punktów i utworzyć n + 1 wymiarowy sympleks. Wyznaczyć środek sympleksu. Podział na 3 metody:
+     * Krok 3: Wylosować ze zbioru P n punktów i utworzyć n + 1 wymiarowy sympleks. Wyznaczyć środek sympleksu. Podział na 3 metody:
      */
 
 
@@ -179,7 +181,7 @@ public class NonlinearOptimization {
 
     /**
      * Wyznaczenie środka symplexu.
-     * Uwaga: przyjąłem że wartości każego punktu zaokrąglam do liczby całkowitej.
+     * Uwaga: przyjąłem, że składowe każdego punktu zaokrąglam do liczby całkowitej.
      */
     static int[] getSimplexCenter(List<int[]> simplex) {
         int[] tempPoint;
@@ -206,7 +208,7 @@ public class NonlinearOptimization {
     }
 
     /**
-     * Krok 4 Operacja odbicia: odbij punkt xn względem środka sympleksu
+     * Krok 4: Operacja odbicia: odbij punkt xn względem środka sympleksu
      */
     static int[] bounceSimplex(int[] simplexCenter, int[] xnApexOfSimplex) {
         int[] pointBouncedByCenterOfSimplex = new int[DIMENSION_SIZE];
@@ -217,7 +219,7 @@ public class NonlinearOptimization {
     }
 
     /**
-     * Krok 5  Sprawdź czy xr pełnia ograniczenia. Jeśli tak to Krok 6. Jeśli nie Krok 3.
+     * Krok 5: Sprawdź czy xr pełnia ograniczenia. Jeśli tak to Krok 6. Jeśli nie Krok 3.
      */
     static boolean checkLimits(int[] pointBouncedByCenterOfSimplex) {
         for (int i = 0; i < DIMENSION_SIZE; i++) {
