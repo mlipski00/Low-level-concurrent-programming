@@ -1,57 +1,66 @@
 package com.company;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class NonlinearOptimization {
 
     final static int DIMENSION_SIZE = 5;
-    final static double EPSILON = 0.001;
+    final static double EPSILON = 0.000001;
     static Set<int[]> randomPoints;
+    static List<int[]> nPoints;
     static List<int[]> simplex;
     static int[] minimalPoint;
+    static int[] simplexCenter;
     static int[] xnApexOfSimplex;
     static int[] pointBouncedByCenterOfSimplex;
 
     public static void main(String[] args) {
-        System.out.println(controlledRandomSearch(new int[]{0, 0, 0, 0, 0}));
-        System.out.println(controlledRandomSearch(new int[]{2, 0, 0, 0, 0}));
-        System.out.println("\nLosowe N punktów");
-        randomPoints = getRandomPoints();
-        for (int[] point : randomPoints) {
-            System.out.print(Arrays.toString(point) + "\n");
-
-        }
-        System.out.println("\nLosowe 5 punktów");
-        Set<int[]> randomNPoints = getNPoints(randomPoints);
-        for (int[] point : randomNPoints) {
-            System.out.print(Arrays.toString(point) + "\n");
-        }
-        System.out.println("\nMinimum");
-        Map<Double, int[]> minimalPointMap = getMinimalPoint(randomPoints);
-        final Map.Entry<Double, int[]> entry = minimalPointMap.entrySet().iterator().next();
-        minimalPoint = minimalPointMap.get(entry.getKey());
-        System.out.println(Arrays.toString(minimalPoint));
-        System.out.println(controlledRandomSearch(minimalPoint));
-        System.out.println("\nWierzchołki wygenerowanego symplexu");
-        simplex = createSimplex(randomNPoints, minimalPoint);
-        System.out.print(Arrays.toString(simplex.toArray()) + "\n");
-        xnApexOfSimplex = simplex.get(DIMENSION_SIZE);
-        System.out.println("\nSrodek symplexu");
-        System.out.print(Arrays.toString(getSimplexCenter(simplex)) + "\n");
-        System.out.println("\nPunkt odbity od środka symplexu");
-        pointBouncedByCenterOfSimplex = bounceSimplex(getSimplexCenter(simplex), xnApexOfSimplex);
-        System.out.print(Arrays.toString(pointBouncedByCenterOfSimplex) + "\n");
-        System.out.println("\nCzy punkt odbity od środka symplexu spełnia ogranicznia");
-        System.out.println(checkLimits(pointBouncedByCenterOfSimplex));
-        System.out.println("\nCzy punkt odbity od środka symplexu jest nowym najlepszym punktem");
-        System.out.println(controlledRandomSearch(minimalPoint));
-        System.out.println(isNewBestPoint(pointBouncedByCenterOfSimplex, minimalPoint));
-        double v = controlledRandomSearch(pointBouncedByCenterOfSimplex);
-        double v1 = controlledRandomSearch(minimalPoint);
-        System.out.println(v);
-        System.out.println(v1);
+        long start = System.currentTimeMillis();
+        runAlgorithm();
+        long stop = System.currentTimeMillis();
+        System.out.println("Czas wykonania algorytmu w sekundach: " + ((double) stop - (double) start) / 1000);
     }
 
+    static void runAlgorithm() {
+        boolean loop = false;
+        boolean activateStepTwo = true;
+        randomPoints = getRandomPoints();
+        while (!loop) {
+            if (activateStepTwo) {
+                Map<Double, int[]> minimalPointMap = getMinimalPoint(randomPoints);
+                final Map.Entry<Double, int[]> entry = minimalPointMap.entrySet().iterator().next();
+                minimalPoint = minimalPointMap.get(entry.getKey());
+                System.out.println("Bieżący punkt minimalny to: " + Arrays.toString(minimalPoint));
+                System.out.println("Wynik algorytmu: CRS " + new DecimalFormat("#0.000000").format(controlledRandomSearch(minimalPoint)));
+            }
+            loop = controlledRandomSearch(minimalPoint) < EPSILON;
+            nPoints = getNPoints(randomPoints);
+            simplex = createSimplex(nPoints, minimalPoint);
+            simplexCenter = getSimplexCenter(simplex);
+            xnApexOfSimplex = simplex.get(DIMENSION_SIZE);
+            pointBouncedByCenterOfSimplex = bounceSimplex(simplexCenter, xnApexOfSimplex);
+            if (checkLimits(pointBouncedByCenterOfSimplex)) {
+                double xr = controlledRandomSearch(pointBouncedByCenterOfSimplex);
+                double xh = controlledRandomSearch(minimalPoint);
+                /**
+                 * Krok 6 Sprawdź czy jest to punkt lepszy od najgorszego, tzn. spełnia f(xr) < f(xh).
+                 * Jeśli tak to w zbiorze P, w miejsce punktu xh wstaw xr i Krok 2. Jeśli nie to Krok 3
+                 */
+                if (xr < xh) {
+                    randomPoints.remove(minimalPoint);
+                    randomPoints.add(pointBouncedByCenterOfSimplex);
+                    activateStepTwo = true;
+                } else {
+                    activateStepTwo = false;
+                }
+            }
+        }
+    }
+
+    /**
+     * Algorytm CRS.
+     */
     static double controlledRandomSearch(int[] point) {
         double sumOfXsqure = 0;
         double multiplicationOfCosXdividedByIterator;
@@ -145,10 +154,10 @@ public class NonlinearOptimization {
     /**
      * Losowanie n punktów.
      */
-    static Set<int[]> getNPoints(Set<int[]> randomPoints) {
+    static List<int[]> getNPoints(Set<int[]> randomPoints) {
         Random random = new Random();
         List<int[]> listOfRandomPoints = new ArrayList<>(randomPoints);
-        Set<int[]> setOfNPoints = new HashSet<>();
+        List<int[]> setOfNPoints = new ArrayList<>();
         for (int i = 0; i < DIMENSION_SIZE; i++) {
             setOfNPoints.add(listOfRandomPoints.get(random.nextInt(randomPoints.size())));
         }
@@ -158,7 +167,7 @@ public class NonlinearOptimization {
     /**
      * Stworzenie n+1 wymiarowego symplexu.
      */
-    static List<int[]> createSimplex(Set<int[]> setOfNPoints, int[] bestPoint) {
+    static List<int[]> createSimplex(List<int[]> setOfNPoints, int[] bestPoint) {
         List<int[]> simplex = new ArrayList<>(Arrays.asList(bestPoint));
         simplex.addAll(setOfNPoints);
         return simplex;
@@ -170,10 +179,12 @@ public class NonlinearOptimization {
      */
     static int[] getSimplexCenter(List<int[]> simplex) {
         int[] tempPoint;
-        // Java jest językiem z przekazywaniem zmiennych przez wartość. Ale dotyczy to typów prostych.
-        // Dla obiektów przekazywaną wartością jest referencja do obiektu.
-        // Trzeba użyć clone() przy pobieraniu wartości od minimalPoint. Inaczej zmienna tempSimplexCenter byłaby referencją na tą samą wartość co minimalPoint.
-        // Wtedy gdy tempSimplexCenter zmieni wartość, to minimalPoint też wskazywała by na zmienioną wartość przez tempSimplexCenter. Taka sytuacja byłaby błędem.
+        /**
+         * Java jest językiem z przekazywaniem zmiennych przez wartość. Ale dotyczy to typów prostych.
+         * Dla obiektów przekazywaną wartością jest referencja do obiektu.
+         * Trzeba użyć clone() przy pobieraniu wartości od minimalPoint. Inaczej zmienna tempSimplexCenter byłaby referencją na tą samą wartość co minimalPoint.
+         * Wtedy gdy tempSimplexCenter zmieni wartość, to minimalPoint też wskazywała by na zmienioną wartość przez tempSimplexCenter. Taka sytuacja byłaby błędem.
+         */
         int[] tempSimplexCenter = minimalPoint.clone();
         for (int i = 1; i < DIMENSION_SIZE - 1; i++) {
             tempPoint = simplex.get(i);
@@ -211,16 +222,6 @@ public class NonlinearOptimization {
             }
         }
         return true;
-    }
-
-    /**
-     * Krok 6 Sprawdź czy jest to punkt lepszy od najgorszego, tzn. spełnia f(xr) < f(xh).
-     * Jeśli tak to w zbiorze P, w miejsce punktu xh wstaw xr i Krok 2. Jeśli nie to Krok 3
-     */
-    static boolean isNewBestPoint(int[] pointBouncedByCenterOfSimplex, int[] minimalPoint) {
-        double v = controlledRandomSearch(pointBouncedByCenterOfSimplex);
-        double v1 = controlledRandomSearch(minimalPoint);
-        return v < v1;
     }
 }
 
