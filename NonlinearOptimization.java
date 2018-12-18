@@ -30,7 +30,9 @@ public class NonlinearOptimization {
                 final Map.Entry<Double, int[]> entry = minimalPointMap.entrySet().iterator().next();
                 minimalPoint = minimalPointMap.get(entry.getKey());
                 System.out.println("Aktualny punkt minimalny to: " + Arrays.toString(minimalPoint));
-                System.out.println("Wynik algorytmu CRS: " + new DecimalFormat("#0.000000").format(controlledRandomSearch(minimalPoint)));
+                DecimalFormat decimalFormat = new DecimalFormat();
+                decimalFormat.setMaximumFractionDigits(15);
+                System.out.println("Wynik algorytmu CRS: " + decimalFormat.format(controlledRandomSearch(minimalPoint)));
             }
             loop = controlledRandomSearch(minimalPoint) < EPSILON;
             nPoints = getNPoints(randomPoints);
@@ -87,8 +89,8 @@ public class NonlinearOptimization {
     static Set<int[]> getRandomPoints() {
         Set<int[]> generatedRandomPoints = new HashSet<>();
         Random random = new Random();
-        // ograniczam maksymalną liczbę wylosowanych punktów do 100 + (10*(n+1))
-        int setOfPointsSize = random.nextInt(101) + 10 * (DIMENSION_SIZE + 1) + 1;
+        // ograniczam maksymalną liczbę wylosowanych punktów do 500 + (10*(n+1))
+        int setOfPointsSize = random.nextInt(501) + 10 * (DIMENSION_SIZE + 1) + 1;
 
         while (generatedRandomPoints.size() != setOfPointsSize) {
             int[] point = new int[DIMENSION_SIZE];
