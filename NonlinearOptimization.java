@@ -1,5 +1,3 @@
-package com.company;
-
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -32,7 +30,7 @@ public class NonlinearOptimization {
                 final Map.Entry<Double, int[]> entry = minimalPointMap.entrySet().iterator().next();
                 minimalPoint = minimalPointMap.get(entry.getKey());
                 System.out.println("Bieżący punkt minimalny to: " + Arrays.toString(minimalPoint));
-                System.out.println("Wynik algorytmu: CRS " + new DecimalFormat("#0.0000").format(controlledRandomSearch(minimalPoint)));
+                System.out.println("Wynik algorytmu CRS: " + new DecimalFormat("#0.000000").format(controlledRandomSearch(minimalPoint)));
             }
             loop = controlledRandomSearch(minimalPoint) < EPSILON;
             nPoints = getNPoints(randomPoints);
@@ -78,7 +76,7 @@ public class NonlinearOptimization {
          */
         multiplicationOfCosXdividedByIterator = Math.cos(point[0]);
         for (int i = 1; i < point.length; i++) {
-            multiplicationOfCosXdividedByIterator *= (Math.cos(point[i]) / i);
+            multiplicationOfCosXdividedByIterator *= (Math.cos(point[i] / i));
         }
         return 1 / 40 * sumOfXsqure + 1 - multiplicationOfCosXdividedByIterator;
     }
