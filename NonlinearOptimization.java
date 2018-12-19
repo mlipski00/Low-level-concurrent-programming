@@ -36,6 +36,7 @@ public class NonlinearOptimization {
             }
             loop = controlledRandomSearch(minimalPoint) < EPSILON;
             nPoints = getNPoints(randomPoints);
+				// omp parallel
             simplex = createSimplex(nPoints, minimalPoint);
             simplexCenter = getSimplexCenter(simplex);
             xnApexOfSimplex = simplex.get(DIMENSION_SIZE);
@@ -57,7 +58,9 @@ public class NonlinearOptimization {
             }
         }
     }
-
+	
+	// omp parallel
+	
     /**
      * Algorytm CRS.
      */
@@ -83,6 +86,8 @@ public class NonlinearOptimization {
         return 1 / 40 * sumOfXsqure + 1 - multiplicationOfCosXdividedByIterator;
     }
 
+
+	
     /**
      * Krok 1: Wylosować zbiór P punktów o liczności N > 10(n + 1), gdzie n — wymiar zadania.
      */
