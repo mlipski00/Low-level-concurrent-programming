@@ -24,6 +24,7 @@ public class NonlinearOptimization {
         boolean loop = false;
         boolean activateStepTwo = true;
         randomPoints = getRandomPoints();
+		// omp parallel for
         while (!loop) {
             if (activateStepTwo) {
                 Map<Double, int[]> minimalPointMap = getMinimalPoint(randomPoints);
@@ -36,7 +37,6 @@ public class NonlinearOptimization {
             }
             loop = controlledRandomSearch(minimalPoint) < EPSILON;
             nPoints = getNPoints(randomPoints);
-				// omp parallel
             simplex = createSimplex(nPoints, minimalPoint);
             simplexCenter = getSimplexCenter(simplex);
             xnApexOfSimplex = simplex.get(DIMENSION_SIZE);
@@ -67,7 +67,7 @@ public class NonlinearOptimization {
     static double controlledRandomSearch(int[] point) {
         double sumOfXsqure = 0;
         double multiplicationOfCosXdividedByIterator;
-
+		// omp parallel for
         for (int i = 0; i < point.length; i++) {
             /**
              * Obliczenie sumy kwadratów dla każdej ze składowych punktu.
@@ -76,6 +76,7 @@ public class NonlinearOptimization {
                 sumOfXsqure = +point[i] * point[i];
             }
         }
+		// omp parallel for
         /**
          * Mnożenie cos(x/i) z każdej ze składowych punktu.
          */
