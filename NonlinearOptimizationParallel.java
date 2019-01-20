@@ -63,10 +63,11 @@ public class NonlinearOptimization {
     /**
      * Algorytm CRS.
      */
+     // omp critical
     static double controlledRandomSearch(int[] point) {
         double sumOfXsqure = 0;
         double multiplicationOfCosXdividedByIterator;
-        // omp parallel for public(sumOfXsqure) threadNum(8)
+        
         for (int i = 0; i < point.length; i++) {
             /**
              * Obliczenie sumy kwadratów dla każdej ze składowych punktu.
@@ -79,7 +80,6 @@ public class NonlinearOptimization {
          * Mnożenie cos(x/i) z każdej ze składowych punktu.
          */
         multiplicationOfCosXdividedByIterator = Math.cos(point[0]);
-        // omp parallel for public(multiplicationOfCosXdividedByIterator) threadNum(8)
         for (int i = 1; i < point.length; i++) {
             multiplicationOfCosXdividedByIterator *= (Math.cos(point[i] / i + 1));
         }
@@ -100,7 +100,7 @@ public class NonlinearOptimization {
         int setOfPointsSize = 1000 + 10 * (DIMENSION_SIZE + 1) + 1;
         while (generatedRandomPoints.size() != setOfPointsSize) {
             int[] point = new int[DIMENSION_SIZE];
-		// omp parallel for public(point) threadNum(8)
+		// omp parallel for threadNum(8)
             for (int i = 0; i < DIMENSION_SIZE; i++) {
                 point[i] = random.nextInt(80) - 40;
             }
@@ -197,16 +197,16 @@ public class NonlinearOptimization {
          * Wtedy gdy tempSimplexCenter zmieni wartość, to minimalPoint też wskazywała by na zmienioną wartość przez tempSimplexCenter. Taka sytuacja byłaby błędem.
          */
         int[] tempSimplexCenter = minimalPoint.clone();
-	// omp parallel for public(tempPoint, tempSimplexCenter) threadNum(8)
         for (int i = 1; i < DIMENSION_SIZE - 1; i++) {
             tempPoint = simplex.get(i);
+            // omp parallel for threadNum(8)
             for (int j = 0; j < DIMENSION_SIZE; j++) {
                 tempSimplexCenter[j] = tempSimplexCenter[j] + tempPoint[j];
             }
         }
         double[] simplexCenterDouble = new double[DIMENSION_SIZE];
         int[] simplexCenter = new int[DIMENSION_SIZE];
-	// omp parallel for public(simplexCenterDouble, tempSimplexCenter, simplexCenter) threadNum(8)
+		// omp parallel for threadNum(8)
         for (int i = 0; i < DIMENSION_SIZE; i++) {
             simplexCenterDouble[i] = (1 / (double) DIMENSION_SIZE) * (double) tempSimplexCenter[i];
             simplexCenter[i] = (int) simplexCenterDouble[i];
@@ -219,10 +219,10 @@ public class NonlinearOptimization {
      */
     static int[] bounceSimplex(int[] simplexCenter, int[] xnApexOfSimplex) {
         int[] pointBouncedByCenterOfSimplex = new int[DIMENSION_SIZE];
-        // omp parallel for public(pointBouncedByCenterOfSimplex, simplexCenter, xnApexOfSimplex) threadNum(8)
+        // omp parallel for threadNum(8)
         for (int i = 0; i < DIMENSION_SIZE; i++) {
             pointBouncedByCenterOfSimplex[i] = 2 * simplexCenter[i] - xnApexOfSimplex[i];
-        }
+		}
         return pointBouncedByCenterOfSimplex;
     }
 
